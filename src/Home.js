@@ -1,13 +1,21 @@
 import React, { useState } from 'react';
 import { View, Text, SafeAreaView, TouchableOpacity, StyleSheet, Image } from 'react-native';
 import LottieView from 'lottie-react-native';
+import { useNavigation } from '@react-navigation/native'; // Import useNavigation
 
 const Home = () => {
+  const navigation = useNavigation(); // Get the navigation object
+
   const [animationFinished, setAnimationFinished] = useState(false);
 
   const handleAnimationFinish = () => {
     console.log('Animation Finished!');
     setAnimationFinished(true);
+  };
+
+  const onpress = () => {
+    // Use navigation.navigate to redirect to Phone.js
+    navigation.navigate('Phone');
   };
 
   return (
@@ -30,11 +38,11 @@ const Home = () => {
           <View style={{ flex: 1 }}>
             <Image style={styles.image} source={require('../image/taxi2.jpg')} />
             <View style={styles.main}>
-            <Text style={styles.text}>Efficiency at its best:</Text>
-            <Text style={styles.text}>Drivers pick routes,</Text>
-            <Text style={styles.text}>passengers know when to step out.</Text>
+              <Text style={styles.text}>Efficiency at its best:</Text>
+              <Text style={styles.text}>Drivers pick routes,</Text>
+              <Text style={styles.text}>passengers know when to step out.</Text>
             </View>
-            <TouchableOpacity style={styles.button}>
+            <TouchableOpacity style={styles.button} onPress={onpress}>
               <Text style={{ color: 'white' }}>Continue With Mobile Number</Text>
             </TouchableOpacity>
             <Text style={styles.privacy}>
@@ -57,12 +65,13 @@ const styles = StyleSheet.create({
     width: '100%',
     height: '70%',
   },
-  main:{
-      marginTop:30,
+  main: {
+    marginTop: 30,
   },
   text: {
     fontSize: 25,
     marginLeft: 10,
+    fontWeight: 'bold',
   },
   button: {
     alignItems: 'center',
@@ -77,7 +86,7 @@ const styles = StyleSheet.create({
     fontStyle: 'italic',
     color: 'gray', // You can adjust the color as needed
     marginTop: 20,
-    marginLeft:10,
+    marginLeft: 10,
   },
   underlineText: {
     textDecorationLine: 'underline',
