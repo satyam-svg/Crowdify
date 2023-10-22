@@ -1,22 +1,43 @@
 import React, { useState } from "react";
-import { SafeAreaView, Text, View, StyleSheet, TouchableOpacity } from "react-native";
-import PhoneInput from "react-native-phone-number-input";
-import { FontAwesome5 } from '@expo/vector-icons'; 
-import { AntDesign } from '@expo/vector-icons'; 
+import { SafeAreaView, Text, View, StyleSheet, TouchableOpacity, Alert, TextInput } from "react-native";
+import { FontAwesome5 } from '@expo/vector-icons';
 import LottieView from 'lottie-react-native';
+import axios from 'axios';
+import { MaterialIcons } from '@expo/vector-icons'; 
+import { useNavigation } from '@react-navigation/native'; 
 
-const Phone = () => {
-  const [phoneNumber, setPhoneNumber] = useState('');
+const Phone = ({ navigation }) => {
+  const [email, setEmail] = useState('');
   const [tapped, setTapped] = useState(false);
   const [animationFinished, setAnimationFinished] = useState(false);
+  const [otpSent, setOtpSent] = useState(false);
+  const [successMessage, setSuccessMessage] = useState(''); // New state for success message
 
-  const handlePhoneInputTap = () => {
+  const handleEmailInputTap = () => {
     setTapped(true);
   };
 
   const handleAnimationFinish = () => {
     console.log('Animation Finished!');
     setAnimationFinished(true);
+  };
+
+  const sendOTP = async () => {
+    try {
+      const response = await axios.post("http://192.168.170.235:8082/send-otp", {
+        email,
+      });
+      if (response.data.success) {
+        setOtpSent(true);
+        setSuccessMessage("OTP sent successfully!"); // Set success message
+        navigation.navigate("VerificationForm", { email });
+      } else {
+        navigation.navigate('Verify');
+      }
+    } catch (error) {
+      console.error("Error sending OTP:", error);
+      Alert.alert("Error", "Could not send OTP. Please try again later.");
+    }
   };
 
   return (
@@ -34,20 +55,21 @@ const Phone = () => {
           <Text style={styles.text}>WELCOME TO</Text>
           <Text style={styles.text1}>CROWDIFY</Text>
           <View style={styles.line}></View>
-          <Text style={styles.ver}>Enter Your Phone Number For Verification</Text>
+          <Text style={styles.ver}>Enter Your Email Address For Verification</Text>
           <Text style={styles.ver1}>
-            Your contact number is essential for ride updates. We'll send you a verification code via SMS. Your privacy is our priority; we won't share your number.
+            Your email address is essential for account updates. We'll send you a verification code via email. Your privacy is our priority; we won't share your email.
           </Text>
           <View style={styles.input}>
-            <PhoneInput
-              defaultValue={phoneNumber}
-              containerStyle={{ width: "95%", borderColor: 'white' }}
-              defaultCode="IN"
-              onChangeText={(text) => setPhoneNumber(text)}
-              onFocus={handlePhoneInputTap}
+            <TextInput
+            
+              placeholder="Enter your email"
+              value={email}
+              onChangeText={(text) => setEmail(text)}
+              onFocus={handleEmailInputTap}
+              style={styles.emailInput}
             />
-            {tapped && phoneNumber === '' && (
-              <Text style={styles.warningText}>Enter your phone number (required)</Text>
+            {tapped && email === '' && (
+              <Text style={styles.warningText}>Enter your email (required)</Text>
             )}
           </View>
           <View style={styles.sign}>
@@ -56,8 +78,8 @@ const Phone = () => {
               <View style={styles.fb}>
                 <FontAwesome5 name="facebook" size={55} color="black" />
               </View>
-              <View style={styles.google}>
-                <FontAwesome5 name="google" size={51} color="black" />
+              <View style={styles.fb}>
+                <FontAwesome5 name="google" size={55} color="black" />
               </View>
             </View>
           </View>
@@ -65,9 +87,15 @@ const Phone = () => {
       )}
       {animationFinished && (
         <View style={styles.buttonContainer}>
-          <TouchableOpacity style={styles.button}>
-            <Text style={{ color: 'white', alignSelf: 'center', fontSize: 25, fontWeight: 'bold' }}>NEXT</Text>
-          </TouchableOpacity>
+          {otpSent ? (
+            <Text style={{ color: "green", fontSize: 20 }}>
+              {successMessage}
+            </Text>
+          ) : (
+            <TouchableOpacity style={styles.button} onPress={sendOTP}>
+              <Text style={styles.btntext}>NEXT</Text>
+            </TouchableOpacity>
+          )}
         </View>
       )}
     </SafeAreaView>
@@ -116,6 +144,14 @@ const styles = StyleSheet.create({
   input: {
     marginTop: 60,
   },
+  emailInput: {
+    borderWidth: 1,
+    borderColor: 'white',
+    borderRadius: 5,
+    padding: 10,
+    fontSize: 16,
+    color: 'black',
+  },
   warningText: {
     color: 'red',
     marginTop: 10,
@@ -124,6 +160,10 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     marginTop: 100,
+  },
+  btntext:{
+        fontSize:30,
+        fontWeight:"bold"
   },
   signtext: {
     alignSelf: 'center',
@@ -138,9 +178,7 @@ const styles = StyleSheet.create({
   },
   fb: {
     marginRight: 20,
-  },
-  google: {
-    marginRight: 20,
+    flexDirection: 'row',
   },
 });
 
